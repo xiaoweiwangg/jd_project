@@ -3,7 +3,7 @@ import '../service/api.dart';
 import "package:dio/dio.dart";
 import 'dart:convert';
 import 'package:jd_project/models/productmodel.dart';
-
+import '../widget/LoadingWidget.dart';
 class ProductPage extends StatefulWidget {
   Map arguments;
   ProductPage({this.arguments});
@@ -19,15 +19,15 @@ class _ProductPageState extends State<ProductPage> {
   int pageindex = 1;
   int pagesize = 8;
   bool flag = true;
-
+  bool hasmore = true;
   @override
   initState() {
     super.initState();
-          this.getProductlist();
+    this.getProductlist();
     this._scrollController.addListener(() {
       if (this._scrollController.position.pixels >
-          this._scrollController.position.maxScrollExtent) {
-        if (this.flag) {
+          this._scrollController.position.maxScrollExtent-20) {
+        if (this.flag && this.hasmore) {
           this.getProductlist();
         }
       }
@@ -41,17 +41,24 @@ class _ProductPageState extends State<ProductPage> {
     });
     var data = await Dio().get(
         '${api}api/plist?cid=${widget.arguments['cid']}&page=${this.pageindex}&pageSize=${this.pagesize}');
-    print(data);
     print(this.pageindex);
+    print(ProductModel.fromJson(json.decode(data.toString())).result.length);
     setState(() {
       this
           .plist
           .addAll(ProductModel.fromJson(json.decode(data.toString())).result);
+      if (ProductModel.fromJson(json.decode(data.toString())).result.length <
+          this.pagesize) {
+        this.hasmore = false;
+        print('没有更多了');
+      }
       this.pageindex++;
       this.flag = true;
     });
   }
-
+Widget isloading(){
+// if()
+}
   Widget _prolist() {
     if (this.plist.length > 0) {
       return Container(
@@ -63,7 +70,6 @@ class _ProductPageState extends State<ProductPage> {
             itemBuilder: (context, index) {
               String pic = this.plist[index].pic;
               var img = pic.replaceAll('\\', '/');
-              print('${pic + img}');
               return Container(
                 padding: EdgeInsets.all(10),
                 child: Column(
@@ -108,7 +114,7 @@ class _ProductPageState extends State<ProductPage> {
             }),
       );
     } else {
-      return Text("loading");
+      return LoadingWidget();
     }
   }
 
