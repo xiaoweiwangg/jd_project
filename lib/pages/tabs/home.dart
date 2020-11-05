@@ -31,10 +31,13 @@ class _HomeContState extends State<HomeCont>
 //获取轮播图数据方法
   getfoucsdata() async {
     var data = await Dio().get(Config.api + 'api/focus');
-    setState(() {
-      this.focusdata = FocusModel.fromJson(json.decode(data.toString())).result;
-      print(this.focusdata[0].pic);
-    });
+    if (mounted) {
+      setState(() {
+        this.focusdata =
+            FocusModel.fromJson(json.decode(data.toString())).result;
+        print(this.focusdata[0].pic);
+      });
+    }
   }
 
 //获取热门商品数据方法
@@ -42,12 +45,15 @@ class _HomeContState extends State<HomeCont>
     var api = '${Config.api}api/plist?is_hot=1';
     var data = await Dio().get(api);
     print('商品数据' + Config.api + 'public/upload/NkuiIr9puaI7cSxZHfz8UYOT.jpg');
-    setState(() {
-      var hotmodel = HotModel.fromJson(json.decode(data.toString())).result;
-      this.hotproduct = hotmodel.map((e) {
-        return _singleproduct(e);
-      }).toList();
-    });
+    if (mounted) {
+      setState(() {
+        var hotmodel = HotModel.fromJson(json.decode(data.toString())).result;
+        this.hotproduct = hotmodel.map((e) {
+          return _singleproduct(e);
+        }).toList();
+      });
+    }
+    ;
   }
 
 //轮播图组件
@@ -190,7 +196,6 @@ class _HomeContState extends State<HomeCont>
     }
   }
 
-  
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context,
